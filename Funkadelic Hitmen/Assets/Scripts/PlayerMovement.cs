@@ -22,7 +22,11 @@ public class PlayerMovement : MonoBehaviour
 
     // Smoothing variables for turning
     [SerializeField] private float turnSmoothTime = 0.1f;
-    float turnSmoothVelocity;
+    private float turnSmoothVelocity;
+
+    // Input parameters
+    private float horizontalInput;
+    private float verticalInput;
 
     // Start is called before the first frame update
     void Start()
@@ -35,9 +39,18 @@ public class PlayerMovement : MonoBehaviour
     void Update()
     {
         // Get player input for horizontal and vertical movement
-        float horizontalInput = Input.GetAxis("Horizontal");
-        float verticalInput = Input.GetAxis("Vertical");
+        horizontalInput = Input.GetAxis("Horizontal");
+        verticalInput = Input.GetAxis("Vertical");
 
+        if (Input.GetButtonDown("Jump"))
+        {
+            // Handle jumping
+            HandleJump();
+        }
+    }
+
+    void FixedUpdate()
+    {
         // Create a normalized direction vector from input
         Vector3 direction = new Vector3(horizontalInput, 0f, verticalInput).normalized;
 
@@ -65,14 +78,12 @@ public class PlayerMovement : MonoBehaviour
             rb.velocity = new Vector3(rb.velocity.x * friction, rb.velocity.y, rb.velocity.z * friction);
         }
 
-        // Handle jumping
-        HandleJump();
     }
 
     // Function to handle jumping
     private void HandleJump()
     {
-        if (Input.GetButtonDown("Jump") && IsGrounded())
+        if (IsGrounded())
         {
             // Apply jump force if the player is grounded
             rb.velocity = new Vector3(rb.velocity.x, jumpForce, rb.velocity.z);
