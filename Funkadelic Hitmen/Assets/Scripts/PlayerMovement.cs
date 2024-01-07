@@ -24,15 +24,22 @@ public class PlayerMovement : MonoBehaviour
     [SerializeField] private float turnSmoothTime = 0.1f;
     private float turnSmoothVelocity;
 
+    // References for the crosshair
+    [SerializeField] private Transform crosshair;
+
     // Input parameters
     private float horizontalInput;
     private float verticalInput;
+
+    // Camera mode parameter
+    private bool freeLook;
 
     // Start is called before the first frame update
     void Start()
     {
         // Get the Rigidbody component
         rb = GetComponent<Rigidbody>();
+        freeLook = true;
     }
 
     // Update is called once per frame
@@ -47,6 +54,15 @@ public class PlayerMovement : MonoBehaviour
             // Handle jumping
             HandleJump();
         }
+
+        if (Input.GetKeyDown(KeyCode.F))
+        {
+            freeLook = !freeLook;
+        }
+        if (!freeLook)
+        {
+            transform.rotation = cam.rotation;
+        }
     }
 
     void FixedUpdate()
@@ -57,13 +73,17 @@ public class PlayerMovement : MonoBehaviour
         // If there's significant input:
         if (direction.magnitude >= 0.1f)
         {
+            Vector3 moveDirection;
+
+            // Free look 3rd-person camera
             // Calculate the target rotation based on input and camera direction
             float targetAngle = Mathf.Atan2(direction.x, direction.z) * Mathf.Rad2Deg + cam.eulerAngles.y;
             float angle = Mathf.SmoothDampAngle(transform.eulerAngles.y, targetAngle, ref turnSmoothVelocity, turnSmoothTime);
             transform.rotation = Quaternion.Euler(0f, angle, 0);
 
             // Calculate the movement direction based on the target angle
-            Vector3 moveDirection = Quaternion.Euler(0f, targetAngle, 0f) * Vector3.forward;
+            moveDirection = Quaternion.Euler(0f, targetAngle, 0f) * Vector3.forward;
+            
 
             // Normalize the movement direction
             moveDirection = moveDirection.normalized;
@@ -77,7 +97,6 @@ public class PlayerMovement : MonoBehaviour
             // Apply friction when there's no input
             rb.velocity = new Vector3(rb.velocity.x * friction, rb.velocity.y, rb.velocity.z * friction);
         }
-
     }
 
     // Function to handle jumping
